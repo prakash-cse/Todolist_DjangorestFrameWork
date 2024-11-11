@@ -57,22 +57,21 @@ class TodoDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 
-# Register
 class RegisterView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
         user = User.objects.create(
             username=username,
             password=make_password(password)
         )
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        })
 
-# Login (Token-based)
+        return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
+
 class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
